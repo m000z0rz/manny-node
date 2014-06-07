@@ -1,0 +1,29 @@
+{
+  "name": "insteon",
+  "description": "Interface with Insteon PLM",
+  "version": "0.1.0",
+  "author": {
+    "name": "Brian Baker",
+    "email": "m000z0rz@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Brian Baker",
+      "email": "m000z0rz@gmail.com"
+    }
+  ],
+  "dependencies": {
+    "es6-promise": "~1.0.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "insteon.js",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/m000z0rz/insteon"
+  },
+  "main": "insteon",
+  "license": "MIT"
+}
