@@ -10,6 +10,10 @@ require('array.prototype.find');
 //var socketIO = require('socket.io');
 
 
+
+
+// require('child_process').exec('start chrome http://www.netflix.com/WiMovie/70242311?trkid=13462050');
+
 var config = JSON.parse(fs.readFileSync('config.json'));
 
 
@@ -135,7 +139,12 @@ function getServiceConfig(serviceType) {
 
 
 
-var ServiceConstructors = [require('./services/NestService.js'), require('./services/InsteonService.js'), require('./services/OnkyoService.js')];
+var ServiceConstructors = [
+	require('./services/NestService.js'),
+	require('./services/InsteonService.js'),
+	require('./services/OnkyoService.js'),
+	require('./services/BenQProjectorService.js')
+	];
 
 
 
@@ -148,6 +157,7 @@ config.services.forEach(function(serviceConfig) {
 
 	ServiceConstructors.forEach(function(serviceConstructor) {
 		if(serviceConstructor.prototype.type === serviceType) {
+			console.log('initializing service ', serviceType);
 			var newService = new serviceConstructor(config.nodeContext, serviceConfig);
 			services[serviceType] = newService;
 			newService.initialize();

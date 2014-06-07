@@ -52,7 +52,7 @@ OnkyoService.prototype.setVolume = function(context, callback) {
 	var self = this;
 	var toVolume = context.volume;
 
-	toVolume = Math.round(toVolume * 80);
+	//toVolume = Math.round(toVolume * 80);
 	toVolume = Math.min(Math.max(toVolume, 0), 80);
 
 	self._connect.then(function() {
