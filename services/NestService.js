@@ -32,12 +32,16 @@ NestService.prototype.initialize = function() {
 	return new Promise(function(resolve, reject) {
 		nest.login(self.config.username, self.config.password, function (err, data) {
 			if (err) {
-				var errMessage = 'nest login failed: ' + err.message;
+				//var errMessage = 'nest login failed: ' + err.message;
 				console.log(errMessage);
 				reject(new Error(errMessage));
 			} else {
-				console.log('nest logged in');
-				resolve();
+				//console.log('nest logged in');
+				// must fetch status before we can do anything else for some reason
+				nest.fetchStatus(function (data) {
+					//console.log('nest initialization complete');
+					resolve();
+				});
 			}
 		});
 	});

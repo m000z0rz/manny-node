@@ -100,7 +100,7 @@ OnkyoService.prototype.turnOn =function(context, callabck) {
 
 OnkyoService.prototype.turnOff = function(context, callback) {
 	var self = this;
-	self.setPower({power: 'off'}, callback);
+	self.setPower({power: 'standby'}, callback);
 };
 
 OnkyoService.prototype.setPower = function(context, callback) {
@@ -109,7 +109,7 @@ OnkyoService.prototype.setPower = function(context, callback) {
 
 	self._connect.then(function() {
 		onkyo.command('system-power=' + power);
-	});
+	}).catch(function(err) { console.log('onkyo set power catch', err); });
 };
 
 OnkyoService.prototype._awaitQuery = function(commandName) {

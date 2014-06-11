@@ -208,7 +208,11 @@ util.inherits(ProjectorCommandToSerialStream, stream.Transform);
 
 ProjectorCommandToSerialStream.prototype._transform = function(projectorCommand, encoding, callback) {
 	var self = this;
-	self.push(new Buffer(projectorCommand.toString(), 'utf8'));
+	console.log('<projector tx>', {
+			raw: new Buffer(projectorCommand.toString(), 'ascii'),
+			string: projectorCommand.toString()
+		});
+	self.push(new Buffer(projectorCommand.toString(), 'ascii'));
 	callback();
 };
 
@@ -226,6 +230,7 @@ function SerialToProjectorCommandStream() {
 util.inherits(SerialToProjectorCommandStream, stream.Transform);
 
 SerialToProjectorCommandStream.prototype._transform = function(bytes, encoding, callback) {
+	console.log("<projector rx>", {raw: bytes, string: bytes.toString('ascii')});
 	var chunk = this.current + bytes.toString('ascii');
 	var self = this;
 

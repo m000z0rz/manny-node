@@ -160,7 +160,13 @@ config.services.forEach(function(serviceConfig) {
 			console.log('initializing service ', serviceType);
 			var newService = new serviceConstructor(config.nodeContext, serviceConfig);
 			services[serviceType] = newService;
-			newService.initialize();
+			newService.initialize()
+			.then(function() {
+				console.log(serviceType + ' initialized');
+			})
+			.catch(function(err) {
+				console.log('ERROR initializing ', serviceType, err);
+			});
 		}
 	});
 
