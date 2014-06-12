@@ -65,9 +65,10 @@ hubSocket.on('connect',
 		}
 
 		service[functionName](data).then(function(returnData) {
+			console.log('<handleCommand> for ' + data.type + '.' + data.functionName + ' returning ', returnData);
 			tryCall(clientCallback, returnData);
 		}).catch(function(returnErr) {
-			console.log('handleCommand for ' + data.type + '.' + data.functionName + ' returning err ', returnErr);
+			console.log('<handleCommand> ERROR for ' + data.type + '.' + data.functionName + ' returning err ', returnErr);
 			tryCall(clientCallback, {err: returnErr});
 		});
 

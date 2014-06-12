@@ -307,6 +307,9 @@ BenQProjectorService.prototype.initialize = function() {
 					if(queueHead && queueHead.command.equals(projCommand)) {
 						queueHead.resolve();
 						self._commandQueue.shift();
+					} else if(queueHead) {
+						// have a queueHead, but didn't match...
+						console.log('<benq> echo didn\'t match queue head. echo: ', projCommand, ' commandQueue ', _commandQueue);
 					}
 				} else {
 					// this isn't an echo, it should be a solicited response from the projector
@@ -361,14 +364,27 @@ BenQProjectorService.prototype._expectResponse = function(projCommand) {
 };
 
 BenQProjectorService.prototype.setState = function(context) {
+	var self = this;
+
 	var power = context.power;
 	var source = context.source;
 
 	if(power === 'off') return self.setPower('off');
 	else {
-		self.getPower().then(function(actualPower) {
+		return self.getPower().then(function(actualPower) {
+			console.log('check one: ', actualPower);
 			//if(actualPower === 'on') return 
-		})
+			if(actualPower === 'on') return Promise.resolve();
+			else return self.turnOn();
+		}).catch(function(err) {
+			console.log('err on one: ', err);
+			//probably a timeout. need to run the projector on
+			return self.turnOn();
+		}).then(function() {
+			console.log('setting source ', source);
+			//now, set the source
+			return self.setSource({source: source});
+		});
 	}
 };
 
@@ -383,6 +399,31 @@ BenQProjectorService.prototype.getPower = function(context) {
 
 	//self._sendCommand(new ProjectorCommand('power', '?'));
 	return self._expectResponse(new ProjectorCommand('power', '?'));
+};
+
+// turn on and wait for it to be on
+BenQProjectorService.prototype.turnOn = function(context) {
+	var self = this;
+
+	// kind of using a dumb system... we'll try to wait 10 seconds after sending command to turn on,
+	//     then check and see if it says it's on and resolve if so, reject if not
+	self.setPower({power: 'on'}).then(function() {
+		return new Promise(function(resolve, reject) {
+			setTimeout(resolve, 10000);
+		});
+	}).catch(function(err) {
+		return new Promise(function(resolve, reject) {
+			setTimeout(resolve, 10000);
+		});
+	}).then(function(resolve, reject) {
+		// now we check power
+		return self.getPower().then(function(power) {
+			if(power === 'on') return Promise.resolve();
+			else return Promise.reject('projector didn\t turn on; power=' + power);
+		}).catch(function(err) {
+			return Promise.reject('project didn\'t turn on; err: ' + err);
+		});
+	});
 };
 
 BenQProjectorService.prototype.setSource = function(context) {
