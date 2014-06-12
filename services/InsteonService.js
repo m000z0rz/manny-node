@@ -49,60 +49,46 @@ InsteonService.prototype.initialize = function() {
 	});
 };
 
-InsteonService.prototype.toggle = function(context, callback) {
+InsteonService.prototype.toggle = function(context) {
 	var self = this;
 
-	self._plm.getLightLevel(context.insteonAddress)
-	.then(function(lightLevel) {
+	return self._plm.getLightLevel(context.insteonAddress).then(function(lightLevel) {
 		return self._plm.setLightLevel(context.insteonAddress, !lightLevel);
-	})
-	.then(callback)
-	.catch(callback);
+	});
 };
 
-InsteonService.prototype.turnOn = function(context, callback) {
+InsteonService.prototype.turnOn = function(context) {
 	var self = this;
 	var insteonAddress = context.insteonAddress;
 
-	self._plm.setLightLevel(insteonAddress, 0xFF)
-	.then(callback)
-	.catch(callback);
+	return self._plm.setLightLevel(insteonAddress, 0xFF);
 };
 
-InsteonService.prototype.turnOff = function(context, callback) {
+InsteonService.prototype.turnOff = function(context) {
 	var self = this;
 	var insteonAddress = context.insteonAddress;
 
-	self._plm.setLightLevel(insteonAddress, 0x00)
-	.then(callback)
-	.catch(callback);
+	return self._plm.setLightLevel(insteonAddress, 0x00);
 };
 
-InsteonService.prototype.setDimmer = function(context, callback) {
+InsteonService.prototype.setDimmer = function(context) {
 	var self = this;
 	var insteonAddress = context.insteonAddress;
 
-	self._plm.setLightLevel(insteonAddress, context.lightLevel)
-	.then(callback)
-	.catch(callback);
+	return self._plm.setLightLevel(insteonAddress, context.lightLevel);
 };
 
-InsteonService.prototype.startAllLinking = function(context, callback) {
+InsteonService.prototype.startAllLinking = function(context) {
 	var self = this;
-	self._plm.startAllLinking()
-	.then(callback)
-	.catch(callback);
+	
+	return self._plm.startAllLinking();
 };
 
-InsteonService.prototype.cancelAllLinking = function(context, callback) {
+InsteonService.prototype.cancelAllLinking = function(context) {
 	console.log('in service cancel function');
 	var self = this;
-	self._plm.cancelAllLinking()
-	.then(callback)
-	.catch(function(err) {
-		console.log('cancelALlLinking err: ', err);
-		callback(err);
-	});
+
+	return self._plm.cancelAllLinking();
 };
 
 

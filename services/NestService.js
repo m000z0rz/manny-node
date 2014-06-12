@@ -57,66 +57,74 @@ NestService.prototype._getDeviceIdByContextLocation = function(contextLocation) 
 
 
 
-NestService.prototype.getStatus = function(context, callback) {
+NestService.prototype.getStatus = function(context) {
 	var self = this;
 	// match context.location against map to find specific nest?
 	var deviceId = self._getDeviceIdByContextLocation('');
 
-	nest.fetchStatus(function (data) {
-		if(!data.shared || !data.shared[deviceId]) {
-			// callback badstuff
-			console.log('nest fetch status doesn\'t have data for device ' + deviceId);
-		} else {
-			var deviceData = data.shared[deviceId];
+	return new Promise(function(resolve, reject) {
+		nest.fetchStatus(function (data) {
+			if(!data.shared || !data.shared[deviceId]) {
+				// callback badstuff
+				//console.log('nest fetch status doesn\'t have data for device ' + deviceId);
+				reject('no data found for configured device id');
+			} else {
+				var deviceData = data.shared[deviceId];
 
-			callback({
-				currentTemperature: self.cToF(deviceData.current_temperature),
-				targetTemperature: self.cToF(deviceData.target_temperature),
-				targetTemperatureType: deviceData.target_temperature_type,
-				fanOn: deviceData.hvac_fan_state
-			});
-		}
+				resolve({
+					currentTemperature: self.cToF(deviceData.current_temperature),
+					targetTemperature: self.cToF(deviceData.target_temperature),
+					targetTemperatureType: deviceData.target_temperature_type,
+					fanOn: deviceData.hvac_fan_state
+				});
+			}
+		});
 	});
 
 };
 
-NestService.prototype.setTemperatureRelative = function(context, callback) {
+NestService.prototype.setTemperatureRelative = function(context) {
 	var self = this;
 	var deviceId = getDeviceIdByContextLocation("");
 	var relativeTargetTemperature = +context.relativeTargetTemperature;
 
-	nest.fetchStatus(function (data) {
-		if(!data.shared || !data.shared[deviceId]) {
-			// callback badstuff
-			console.log('nest set temperature relatie doesn\'t have data for device ' + deviceId);
-		} else {
-			var deviceData = data.shared[deviceId];
-			//var currentTemperature = deviceData.current_temperature;
-			var targetTemperatureType = deviceData.target_temperature_type;
-			if(targetTemperatureType === "cool" || targetTmperatureType === "heat") {
-				var currentTemperature = self.cToF(deviceData.current_temperature);
-				var targetTemperature = self.cToF(deviceData.target_temperature_type) + relativeTargetTemperature;
-				console.log('nest setting target temperature from ' + currentTemperature + ' to ' + targetTemperature);
-				nest.setTemperature(devieId, self.fToC(targetTemperature));
+	return new Promise(function(resolve, reject) {
+		nest.fetchStatus(function (data) {
+			if(!data.shared || !data.shared[deviceId]) {
+				// callback badstuff
+				//console.log('nest set temperature relatie doesn\'t have data for device ' + deviceId);
+				reject('nest set temperature relative doesn\t have data for configured device');
 			} else {
-				console.log('nest setTemperatureRelative didn\'t recognize targetTemperatureType ' + targetTemperatureType);
+				var deviceData = data.shared[deviceId];
+				//var currentTemperature = deviceData.current_temperature;
+				var targetTemperatureType = deviceData.target_temperature_type;
+				if(targetTemperatureType === "cool" || targetTmperatureType === "heat") {
+					var currentTemperature = self.cToF(deviceData.current_temperature);
+					var targetTemperature = self.cToF(deviceData.target_temperature_type) + relativeTargetTemperature;
+					console.log('nest setting target temperature from ' + currentTemperature + ' to ' + targetTemperature);
+					nest.setTemperature(devieId, self.fToC(targetTemperature));
+				} else {
+					reject('nest setTemperatureRelative didn\'t recognize targetTemperatureType ' + targetTemperatureType);
+				}
+				resolve();
 			}
-			callback();
-		}
+		});
 	});
 };
 
 
-NestService.prototype.setFanOn = function(context, callback) {
+NestService.prototype.setFanOn = function(context) {
 	var self = this;
 	var deviceId = self._getDeviceIdByContextLocation('');
+
 	nest.setFanModeOn(deviceId);
-	callback();
+	return Promise.resolve(); //callback();
 };
 
-NestService.prototype.setFanAuto = function(context, callback) {
+NestService.prototype.setFanAuto = function(context) {
 	var self = this;
 	var deviceId = self._getDeviceIdByContextLocation('');
+
 	nest.setFanModeAuto(deviceId);
-	callback();
+	return Promise.resolve(); //callback();
 };

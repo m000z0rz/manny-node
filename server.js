@@ -64,10 +64,19 @@ hubSocket.on('connect',
 			return;
 		}
 
+		service[functionName](data).then(function(returnData) {
+			tryCall(clientCallback, returnData);
+		}).catch(function(returnErr) {
+			console.log('handleCommand for ' + data.type + '.' + data.functionName + ' returning err ', returnErr);
+			tryCall(clientCallback, {err: returnErr});
+		});
+
+		/*
 		service[functionName](data, function(data) {
 			//ifClientCallback(data);
 			tryCall(clientCallback, data);
 		});
+		*/
 
 
 	});

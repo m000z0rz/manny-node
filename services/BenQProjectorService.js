@@ -104,10 +104,10 @@ ProjectorCommand.prototype._toHumanValue = function(property, value) {
 	pProp = self._toProjectorProperty(property);
 	hProp = self._toHumanProperty(property);
 
-	var value = value.toLowerCase();
+	value = value.toLowerCase();
 
 
-	var htopMap = self.humanToProjectorValue[hProp]
+	var htopMap = self.humanToProjectorValue[hProp];
 	var ptohMap = self.projectorToHumanValue[pProp];
 
 	if(!htopMap) return;
@@ -124,10 +124,10 @@ ProjectorCommand.prototype._toProjectorValue = function(property, value) {
 	pProp = self._toProjectorProperty(property);
 	hProp = self._toHumanProperty(property);
 
-	var value = value.toLowerCase();
+	value = value.toLowerCase();
 
 
-	var htopMap = self.humanToProjectorValue[hProp]
+	var htopMap = self.humanToProjectorValue[hProp];
 	var ptohMap = self.projectorToHumanValue[pProp];
 
 	if(!htopMap) return;
@@ -266,10 +266,10 @@ SerialToProjectorCommandStream.prototype._transform = function(bytes, encoding, 
 function BenQProjectorService(nodeContext, config) {
 	var self = this;
  
- 	self.config = config;
- 	self._timeout = config.timeout || 300;
- 	self._commandQueue = [];
- 	self._expected = {};
+	self.config = config;
+	self._timeout = config.timeout || 300;
+	self._commandQueue = [];
+	self._expected = {};
 }
 
 BenQProjectorService.prototype.type = 'benqprojector';
@@ -360,35 +360,39 @@ BenQProjectorService.prototype._expectResponse = function(projCommand) {
 	});
 };
 
-BenQProjectorService.prototype.setPower = function(context, callback) {
-	var self = this;
-	//console.log('benq setPower ', context);
-	self._sendCommand(new ProjectorCommand('power', context.power))
-	.then(callback)
-	.catch(function(err) { callback({err: err}); });
+BenQProjectorService.prototype.setState = function(context) {
+	var power = context.power;
+	var source = context.source;
+
+	if(power === 'off') return self.setPower('off');
+	else {
+		self.getPower().then(function(actualPower) {
+			//if(actualPower === 'on') return 
+		})
+	}
 };
 
-BenQProjectorService.prototype.getPower = function(context, callback) {
+BenQProjectorService.prototype.setPower = function(context) {
+	var self = this;
+	//console.log('benq setPower ', context);
+	return self._sendCommand(new ProjectorCommand('power', context.power));
+};
+
+BenQProjectorService.prototype.getPower = function(context) {
 	var self = this;
 
 	//self._sendCommand(new ProjectorCommand('power', '?'));
-	self._expectResponse(new ProjectorCommand('power', '?'))
-	.then(callback)
-	.catch(function(err) { callback({err: err}); });
+	return self._expectResponse(new ProjectorCommand('power', '?'));
 };
 
-BenQProjectorService.prototype.setSource = function(context, callback) {
+BenQProjectorService.prototype.setSource = function(context) {
 	var self = this;
 	//console.log('benQ setSource ', context);
-	self._sendCommand(new ProjectorCommand('source', context.source))
-	.then(callback)
-	.catch(function(err) { callback({err: err}); });
+	return self._sendCommand(new ProjectorCommand('source', context.source));
 };
 
-BenQProjectorService.prototype.getSource = function(context, callback) {
+BenQProjectorService.prototype.getSource = function(context) {
 	var self = this;
 	//self._sendCommand(new ProjectorCommand('source', '?'));
-	self._expectResponse(new ProjectorCommand('source', '?'))
-	.then(callback)
-	.catch(function(err) { callback({err: err}); });
+	return self._expectResponse(new ProjectorCommand('source', '?'));
 };
