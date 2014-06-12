@@ -393,6 +393,8 @@ PowerLineModem.prototype.setMonitorMode = function(newValue) {
 PowerLineModem.prototype.factoryReset = function() {
 	var self = this;
 
+	return self._sendCommand(new InsteonCommands.byName['FactoryReset']());
+	/*
 	return new Promise(function(resolve, reject) {
 		var resetCommand = new InsteonCommands.byName['FactoryReset']();
 		self._sendCommand(resetCommand).then(function(response) {
@@ -401,6 +403,7 @@ PowerLineModem.prototype.factoryReset = function() {
 			reject(err);
 		});
 	});
+	*/
 };
 
 PowerLineModem.prototype.startAllLinking = function(linkAs, group) {

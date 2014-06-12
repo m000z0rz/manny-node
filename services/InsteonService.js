@@ -43,6 +43,16 @@ InsteonService.prototype.initialize = function() {
 			connectOptions.serialStream = plmStream;
 
 			self._plm = insteon.connect(connectOptions);
+			self._plm.on('command:AllLinkingCompleted', function(command) {
+				// command should have:
+				// linkType
+				// allLinkGroup (7)
+				// id
+				// deviceCategory(Id) (Dimmable Lighting Control)
+				// deviceSubactegory(Id) (SwitchLinc Dimmer)
+				// firwmareVersion
+
+			});
 
 			resolve();
 		});
