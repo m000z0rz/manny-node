@@ -1,14 +1,22 @@
 module.exports = InsteonService;
 
-var insteon = require('../insteon');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter;
+
+var Promise = require('../node_modules/es6-promise').Promise;
+
 var serialport = require('../node_modules/serialport');
 var serialStream = require('../serial-stream.js');
 
-var Promise = require('../node_modules/es6-promise').Promise;
+var insteon = require('../insteon');
+
+
 
 // Insteon Service ///////////////////////////////
 //var nestConfig = config.services.find(function(service) { return service.type === "nest"; });
 function InsteonService (nodeContext, config) {
+	EventEmitter.call(this);
 	//var _serialport = require('serialport');
 	//var _serialStream = require('./serial-stream.js');
 
@@ -20,7 +28,8 @@ function InsteonService (nodeContext, config) {
 
 	self.config = config;
 
-};
+}
+util.inherits(InsteonService, EventEmitter);
 
 InsteonService.prototype.type = 'devices-insteon';
 
@@ -45,19 +54,36 @@ InsteonService.prototype.initialize = function() {
 			self._plm = insteon.connect(connectOptions);
 			self._plm.on('command:AllLinkingCompleted', function(command) {
 				// command should have:
-				// linkType
+				// linkType (responder/controller/either/delete)
 				// allLinkGroup (7)
 				// id
 				// deviceCategory(Id) (Dimmable Lighting Control)
 				// deviceSubactegory(Id) (SwitchLinc Dimmer)
 				// firwmareVersion
+				console.log('InsteonService on command:AllLinkingCompleted', command);
 
+				self.emit('serviceEvent', {
+					type: 'allLinkCompleted',
+					data: {
+						room: self._lastStartAllLinkingRoom,
+						linkType: command.linkType,
+						allLinkGroup: command.allLinkGroup,
+						insteonAddress: command.id.toString(),
+						deviceCategory: command.deviceCategory,
+						deviceCategoryId: command.deviceCategoryId,
+						deviceSubcategory: command.deviceSubcategory,
+						devicesubCategoryId: command.deviceSubcategoryId
+					}
+				});
 			});
 
 			resolve();
 		});
 	});
 };
+
+
+
 
 InsteonService.prototype.toggle = function(context) {
 	var self = this;
@@ -90,15 +116,17 @@ InsteonService.prototype.setDimmer = function(context) {
 
 InsteonService.prototype.startAllLinking = function(context) {
 	var self = this;
-	
+	self._lastStartAllLinkingRoom = context.room;
+
 	return self._plm.startAllLinking();
 };
 
 InsteonService.prototype.cancelAllLinking = function(context) {
-	console.log('in service cancel function');
 	var self = this;
-
 	return self._plm.cancelAllLinking();
 };
 
-
+InsteonService.prototype.factoryReset = function(context) {
+	console.log('factory reset whoa');
+	return this._plm.factoryReset();
+};

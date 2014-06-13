@@ -1,7 +1,13 @@
 module.exports = NestService;
 
-var nest = require('../node_modules/unofficial-nest-api');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter;
+
 var Promise = require('../node_modules/es6-promise').Promise;
+
+var nest = require('../node_modules/unofficial-nest-api');
+
 
 // Nest Service ///////////////////////////////////////////
 
@@ -22,7 +28,8 @@ function NestService (nodeContext, config) {
 	//nest.setAway();
 	//nest.setHome();
 	//nest.setTargetTemperatureType(ids[0], 'heat');
-};
+}
+util.inherits(NestService, EventEmitter);
 
 NestService.prototype.type = 'nest';
 

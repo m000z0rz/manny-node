@@ -90,7 +90,7 @@ hubSocket.on('connect',
 		}
 	}
 	hubSocket.emit('announceNode', {
-		context: config.context,
+		nodeContext: config.nodeContext,
 		services: servicesJSON
 		//services: services
 	});
@@ -173,6 +173,11 @@ config.services.forEach(function(serviceConfig) {
 			newService.initialize()
 			.then(function() {
 				console.log(serviceType + ' initialized');
+				newService.on('serviceEvent', function(serviceEvent) {
+					serviceEvent.serviceType = newService.type;
+					serviceEvent.nodeContext = config.nodeContext;
+					hubSocket.emit('serviceEvent', serviceEvent);
+				});
 			})
 			.catch(function(err) {
 				console.log('ERROR initializing ', serviceType, err);

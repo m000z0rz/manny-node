@@ -3,8 +3,14 @@ module.exports = OnkyoService;
 // setting input-selector wil take out of standby and give input-selector event
 //   that's the best time to set volume, in case it was in standby and misses the volume command
 
-var onkyo = require('../eiscp');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter;
+
 var Promise = require('../node_modules/es6-promise').Promise;
+
+var onkyo = require('../eiscp');
+
 
 
 
@@ -64,6 +70,7 @@ function OnkyoService(nodeContext, config) {
 	//_onkyo.connect();
 	
 }
+util.inherits(OnkyoService, EventEmitter);
 
 OnkyoService.prototype.type = 'onkyo';
 

@@ -1,12 +1,18 @@
 module.exports = BenQProjectorService;
 
 
-//var onkyo = require('eiscp');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter;
+var stream = require('stream');
+
+var Promise = require('../node_modules/es6-promise').Promise;
+
 var serialport = require('../node_modules/serialport');
 var serialStream = require('../serial-stream.js');
-var util = require('util');
-var stream = require('stream');
-var Promise = require('../node_modules/es6-promise').Promise;
+
+
+
 
 
 
@@ -271,6 +277,7 @@ function BenQProjectorService(nodeContext, config) {
 	self._commandQueue = [];
 	self._expected = {};
 }
+util.inherits(BenQProjectorService, EventEmitter);
 
 BenQProjectorService.prototype.type = 'benqprojector';
 
@@ -317,6 +324,7 @@ BenQProjectorService.prototype.initialize = function() {
 						self._expected[projCommand.property].forEach(function(expectation) {
 							expectation.resolve(projCommand.propertyValue);
 						});
+						self._expected[projCommand.property] = []; // clear them out
 					}
 				}
 				// emit

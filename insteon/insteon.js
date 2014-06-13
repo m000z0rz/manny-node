@@ -101,6 +101,7 @@ util.inherits(SerialToInsteonCommandStream, stream.Transform);
 
 SerialToInsteonCommandStream.prototype._transform = function(bytes, encoding, callback) {
 	var chunk = Buffer.concat([this.current, bytes]);
+	//console.log('<insteon> rx bytes ', bytes);
 	var self = this;
 
 	var lastStartCommandIndex = -1;
@@ -413,6 +414,8 @@ PowerLineModem.prototype.startAllLinking = function(linkAs, group) {
 	linkAs = linkAs || 'controller';
 	group = group || self._defaultAllLinkGroup;
 
+	return self._sendCommand(new InsteonCommands.byName['StartAllLinking'](linkAs, group));
+	/*
 	return new Promise(function(resolve, reject) {
 		var startLinkingCommand = new InsteonCommands.byName['StartAllLinking'](linkAs, group);
 		self._sendCommand(startLinkingCommand).then(function(response) {
@@ -421,6 +424,7 @@ PowerLineModem.prototype.startAllLinking = function(linkAs, group) {
 			reject(err);
 		});
 	});
+	*/
 };
 
 PowerLineModem.prototype.cancelAllLinking = function() {
