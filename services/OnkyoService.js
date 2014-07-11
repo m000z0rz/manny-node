@@ -90,7 +90,7 @@ OnkyoService.prototype.initialize = function() {
 	return self._connect; // built this promise in constructor
 };
 
-OnkyoService.prototype._inputChanged(oldInput, newInput) {
+OnkyoService.prototype._inputChanged = function(oldInput, newInput) {
 	if(oldInput === newInput) return;
 
 	if(self.config.audioSwitch !== undefined) {
