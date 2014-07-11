@@ -6,11 +6,13 @@ module.exports = OnkyoService;
 var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter;
+var path = require('path');
+var child_process = require('child_process');
 
 var Promise = require('../node_modules/es6-promise').Promise;
 
 var onkyo = require('../eiscp');
-
+// require('child_process').exec('start chrome http://www.netflix.com/WiMovie/70242311?trkid=13462050');
 
 
 
@@ -55,11 +57,17 @@ function OnkyoService(nodeContext, config) {
 	self.config = config;
 	self._timeout = config.timeout || 2000;
 
+	self._currentInput = "unknown";
 
 	['volume', 'input-selector', 'system-power'].forEach(function(commandName) {
 		self._awaitingCommand[commandName] = [];
 		onkyo.on(commandName, function(value) {
 			console.log('<onkyo> rx ' + commandName + '=' + value);
+			if(commandName === 'input-selector') {
+				if(value !== self._currentInput);
+				self._inputChanged(self._currentInput, value);
+				self._currentInput = value;
+			}
 			self._awaitingCommand[commandName].forEach(function(awaitOptions) {
 				if(value instanceof Array) awaitOptions.resolve(value[0]);
 				else awaitOptions.resolve(value);
@@ -81,6 +89,24 @@ OnkyoService.prototype.initialize = function() {
 
 	return self._connect; // built this promise in constructor
 };
+
+OnkyoService.prototype._inputChanged(oldInput, newInput) {
+	if(oldInput === newInput) return;
+
+	if(self.config.audioSwitch !== undefined) {
+		var ahk = self.config.audioSwitch.autoHotkeyPath;
+		var audioSwitchScript = path.resolve(__dirname, 'change_default_audio.ahk');
+		var scriptConfig;
+
+		if(oldInput === 'pc') {
+			scriptConfig = self.config.audioSwitch.offpc;
+			child_process.exec('start ahk ' + audioSwitchScript + ' ' + scriptConfig.numDown + ' ' + scriptConfig.numTab);
+		} else if (newInput === 'pc') {
+			scriptConfig = self.config.audioSwitch.onpc;
+			child_process.exec('start ahk ' + audioSwitchScript + ' ' + scriptConfig.numDown + ' ' + scriptConfig.numTab);
+		}
+	}
+}
 
 
 OnkyoService.prototype.setState = function(context) {
