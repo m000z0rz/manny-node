@@ -65,8 +65,13 @@ function OnkyoService(nodeContext, config) {
 			console.log('<onkyo> rx ' + commandName + '=' + value);
 			if(commandName === 'input-selector') {
 				if(value !== self._currentInput);
-				self._inputChanged(self._currentInput, value);
-				self._currentInput = value;
+				if(value !== undefined && value[0] !== undefined) {
+					self._inputChanged(self._currentInput, value[0]);
+					self._currentInput = value[0];
+				} else {
+					self._inputChanged(self._currentInput, 'unknown');
+					self._currentInput = 'unknown';
+				}
 			}
 			self._awaitingCommand[commandName].forEach(function(awaitOptions) {
 				if(value instanceof Array) awaitOptions.resolve(value[0]);
@@ -91,19 +96,27 @@ OnkyoService.prototype.initialize = function() {
 };
 
 OnkyoService.prototype._inputChanged = function(oldInput, newInput) {
+	var self = this;
+
 	if(oldInput === newInput) return;
 
+	console.log('<onkyo> inputChanged from ', oldInput, ' to ', newInput);
 	if(self.config.audioSwitch !== undefined) {
 		var ahk = self.config.audioSwitch.autoHotkeyPath;
 		var audioSwitchScript = path.resolve(__dirname, 'change_default_audio.ahk');
 		var scriptConfig;
+		var command;
 
-		if(oldInput === 'pc') {
+		if(oldInput === 'video6' || oldInput === 'unknown') {
 			scriptConfig = self.config.audioSwitch.offpc;
-			child_process.exec('start ahk ' + audioSwitchScript + ' ' + scriptConfig.numDown + ' ' + scriptConfig.numTab);
-		} else if (newInput === 'pc') {
+			command = 'start "' + ahk + '" "' + audioSwitchScript + '" ' + scriptConfig.numDown + ' ' + scriptConfig.numTab;
+			console.log('<onkyo> switch to mini speaker, ', command);
+			child_process.exec(command);
+		} else if (newInput === 'video6') {
 			scriptConfig = self.config.audioSwitch.onpc;
-			child_process.exec('start ahk ' + audioSwitchScript + ' ' + scriptConfig.numDown + ' ' + scriptConfig.numTab);
+			command = 'start "' + ahk + '" "' + audioSwitchScript + '" ' + scriptConfig.numDown + ' ' + scriptConfig.numTab;
+			console.log('<onkyo> switch to main audio, ', command);
+			child_process.exec(command);
 		}
 	}
 }
